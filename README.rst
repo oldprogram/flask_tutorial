@@ -73,3 +73,8 @@ Run with coverage report::
     $ coverage run -m pytest
     $ coverage report
     $ coverage html  # open htmlcov/index.html in a browser
+    
+
+REF
+----
+`[python][flask] Flask 图片上传与下载例子（支持漂亮的拖拽上传） <https://www.cnblogs.com/zjutlitao/p/16325464.html>`_  tag：demo_tuchuang

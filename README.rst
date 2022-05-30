@@ -14,12 +14,10 @@ you're reading.** You probably want the latest tagged version, but the
 default Git version is the main branch. ::
 
     # clone the repository
-    $ git clone https://github.com/pallets/flask
-    $ cd flask
+    $ git clone https://github.com/oldprogram/flask_tutorial.git
     # checkout the correct version
     $ git tag  # shows the tagged versions
     $ git checkout latest-tag-found-above
-    $ cd examples/tutorial
 
 Create a virtualenv and activate it::
 

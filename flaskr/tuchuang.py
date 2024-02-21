@@ -11,6 +11,7 @@ from flask import Flask, flash, request, redirect, url_for, jsonify
 from flask import send_from_directory
 from flask import render_template
 from werkzeug.utils import secure_filename
+from pypinyin import lazy_pinyin
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = basedir+'/static/file/img'
@@ -63,6 +64,27 @@ class File:
             return '.' in filename and \
                 filename.rsplit('.', 1)[1].lower() in ALLOWED_SHARE_EXTENSIONS
 
+    @staticmethod  
+    def is_chinese(string):
+        """
+        https://blog.csdn.net/gixome/article/details/123249482
+        检查整个字符串是否包含中文
+        :param string: 需要检查的字符串
+        :return: bool
+        """
+        for ch in string:
+            if u'\u4e00' <= ch <= u'\u9fff':
+                return True
+    
+        return False
+    
+    @staticmethod  
+    def to_pinyin(filename):
+        name = filename.split('.')[0]
+        ext = filename.split('.')[1]
+        filename = '_'.join(lazy_pinyin(name)) + '.' + ext
+        return filename
+
 
 #####################################################################################
 @bp.route('/upload', methods=['GET', 'POST'])
@@ -81,6 +103,9 @@ def upload_file():
             return redirect(request.url)
         if file and File.allowed_file(file.filename,'img'):
             # 获取安全的文件名 正常文件名
+            # 支持中文，转换为拼音
+            if File.is_chinese(file.filename):
+                file.filename = File.to_pinyin(file.filename)
             filename = secure_filename(file.filename)
             
             # 生成随机数
@@ -102,6 +127,11 @@ def upload_file():
 @login_required
 def share_file():
     if request.method == 'POST':
+        num_files = len(os.listdir(app.config['SHARE_FOLDER']))
+        if num_files >= 10:
+            flash('Share file limit 10')
+            return jsonify(state="fail",reason="share file limit 10")
+        
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
@@ -114,8 +144,11 @@ def share_file():
             return redirect(request.url)
         if file and File.allowed_file(file.filename,'share'):
             # 获取安全的文件名 正常文件名
+            # 支持中文，转换为拼音
+            if File.is_chinese(file.filename):
+                file.filename = File.to_pinyin(file.filename)
             filename = secure_filename(file.filename)
-            
+
             # 生成随机数
             random_num = random.randint(0, 100)
             # f.filename.rsplit('.', 1)[1] 获取文件的后缀
@@ -136,7 +169,8 @@ def share_file():
         else:
             return jsonify(state="fail",reason="file kind not allowed")
         
-    return render_template("tuchuang/share.html")
+    files = File.search(app.config['SHARE_FOLDER'])
+    return render_template("tuchuang/share.html",my_files=files)
 
 @bp.route('/download/<name>')
 def download_file(name):
@@ -163,7 +197,7 @@ def view(page):
     print(os.getcwd()) # 输出当前工作目录的路径
     print(os.path.abspath('.')) # 输出当前文件所在目录的绝对路径
 
-    imgs = File.search("./flaskr/static/file/img")
+    imgs = File.search(app.config['UPLOAD_FOLDER'])
     total_num = len(imgs)
     step = 10
     index_start = int(page) * step

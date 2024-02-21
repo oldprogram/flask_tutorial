@@ -39,3 +39,9 @@ p {
     display: none;
 }
 
+.button-container {
+    display: flex;
+}
+.button-container button {
+    margin-right: 5px; /* 可以调整按钮之间的间距 */
+}

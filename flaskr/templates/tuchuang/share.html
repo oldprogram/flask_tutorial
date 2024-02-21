@@ -1,0 +1,41 @@
+{% extends './tuchuang/backend.html' %}
+
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='file/css/tuchuang/upload.css') }}">
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript"  src="{{ url_for('static', filename='file/js/tuchuang/share.js') }}"></script>
+{% endblock %}
+
+{% block header %}
+  <h1>{% block title %}Upload Pictures{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+</br>
+<h4 class="mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300">
+    Share Files Upload
+</h4>
+<div id="drop-area">
+    <form class="my-form">
+        <p class="mb-4 text-gray-600 dark:text-gray-300">Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</p>
+        <input type="file" id="fileElem" multiple accept="*" onchange="handleFiles(this.files,'/tuchuang/share')">
+        <label class="button" for="fileElem">Select some files</label>
+    </form>
+</div>
+<h4 class="mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300">
+    Share Files List
+</h4>
+<table id="gallery" class="w-full whitespace-no-wrap">
+<tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+<td>NAME</td>
+<td>SIZE</td>
+<td>KIND</td>
+<td>DATE</td>
+<td>ACTION</td>
+</tr>
+</table>
+{% endblock %}

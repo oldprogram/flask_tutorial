@@ -1,5 +1,17 @@
+var qrcode;
+
 window.onload=function(){
     var dropArea = document.getElementById('drop-area')
+    
+    // 获取二维码对象
+    // https://davidshimjs.github.io/qrcodejs/
+    qrcode = new QRCode(document.getElementById("qrcode"), {
+        width : 143,
+        height : 143,
+        colorDark : "#ffffff",
+        colorLight : "#000000",
+        correctLevel : QRCode.CorrectLevel.H
+    });
 
     // 阻止默认行为
     ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -64,7 +76,8 @@ function uploadFile(file) {
                 //console.log(json); // 打印获取到的数据
                 console.log(JSON.stringify(json))
         
-                let tr = document.createElement('tr')                
+                let tr = document.createElement('tr')  
+                tr.setAttribute("class", "text-gray-700 dark:text-gray-400");
                 let td_name = document.createElement('td')
                 td_name.innerText = json.name
                 let td_size = document.createElement('td')
@@ -87,11 +100,18 @@ function uploadFile(file) {
                 action_container.appendChild(btn_delete)
 
                 let btn_download = document.createElement('button')
-                btn_download.setAttribute("class","flex items-center justify-between px-2 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray")
+                btn_download.setAttribute("class","flex items-center justify-between px-1 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray")
                 btn_download.setAttribute("id", "btn_download");
                 btn_download.setAttribute("onclick", "downloadFile(\""+json.name+"\")");
                 btn_download.innerText = 'download'
                 action_container.appendChild(btn_download)
+
+                let btn_qr = document.createElement('button')
+                btn_qr.setAttribute("class","flex items-center justify-between px-0 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray")
+                btn_qr.setAttribute("id", "btn_qr");
+                btn_qr.setAttribute("onclick", "makeQRcode(\""+json.name+"\")");
+                btn_qr.innerText = 'qrcode'
+                action_container.appendChild(btn_qr)
                 
                 td_action.appendChild(action_container)
                 
@@ -102,7 +122,14 @@ function uploadFile(file) {
                 tr.appendChild(td_kind)
                 tr.appendChild(td_date)
                 tr.appendChild(td_action)
-                document.getElementById('gallery').appendChild(tr)
+                //document.getElementById('gallery').appendChild(tr)
+                let table_head = document.getElementById('table_head')
+                table_head.after(tr);
+
+                //生成新二维码
+                makeQRcode(json.name)
+            }else if(json.state == 'fail'){
+                alert(json.reason);
             }
         });
     })
@@ -144,4 +171,22 @@ function downloadFile(fileName) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+function makeQRcode(fileName) {
+    //在黑暗主题下二维码生成的颜色要反过来
+    var elements = document.querySelectorAll(".theme-dark");
+    if(elements.length == 0){//白天模式
+        qrcode._htOption.colorDark = "#000000";
+        qrcode._htOption.colorLight = "#ffffff";
+    }else{//黑暗模式
+        qrcode._htOption.colorDark = "#ffffff";
+        qrcode._htOption.colorLight = "#000000";
+    }
+
+    //生成新二维码
+    var url = document.URL;
+    url = url.replace("share", "download_share") + "/" + fileName;
+    qrcode.clear();
+    qrcode.makeCode(url);
 }

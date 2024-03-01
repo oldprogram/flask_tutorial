@@ -5,6 +5,8 @@ import os
 import random
 import time
 import datetime
+import python_avatars as pa
+from flask import g
 from datetime import datetime
 from flask import Blueprint
 from flask import Flask, flash, request, redirect, url_for, jsonify
@@ -113,12 +115,14 @@ def upload_file():
             # f.filename.rsplit('.', 1)[1] 获取文件的后缀
             # filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + str(random_num) + "." + filename.rsplit('.', 1)[1]
             filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + filename
-            file_path = app.config['UPLOAD_FOLDER']    # basedir 代表获取当前位置的绝对路径
+            file_path = app.config['UPLOAD_FOLDER'] + '/' + secure_filename(g.user["username"])   # basedir 代表获取当前位置的绝对路径
             
             # 如果文件夹不存在，就创建文件夹
             if not os.path.exists(file_path):
 	            os.makedirs(file_path)
-	
+
+            print(secure_filename(g.user["username"]))
+
             file.save(os.path.join(file_path, filename))
             return redirect(url_for('tuchuang.download_file', name=filename))
     return render_template("tuchuang/upload.html")
@@ -173,8 +177,19 @@ def share_file():
     return render_template("tuchuang/share.html",my_files=files)
 
 @bp.route('/download/<name>')
+@login_required
 def download_file(name):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+    file_path = app.config["UPLOAD_FOLDER"] + '/' + secure_filename(g.user["username"]) 
+    # 如果没有头像图片，则自动生成一个
+    # https://pypi.org/project/python-avatars/
+    if name == 'my_avatar.svg':
+        avatar_path = file_path + '/my_avatar.svg'
+        if not os.path.exists(avatar_path):
+            if not os.path.exists(file_path):
+	            os.makedirs(file_path)
+            pa.Avatar.random().render(avatar_path)
+
+    return send_from_directory(file_path, name)
     
 @bp.route('/download_share/<name>')
 def download_share_file(name):
@@ -193,11 +208,12 @@ def delete_share_file(name):
     return jsonify(state="success")
 
 @bp.route('/view/page=<page>')
+@login_required
 def view(page):
     print(os.getcwd()) # 输出当前工作目录的路径
     print(os.path.abspath('.')) # 输出当前文件所在目录的绝对路径
 
-    imgs = File.search(app.config['UPLOAD_FOLDER'])
+    imgs = File.search(app.config['UPLOAD_FOLDER']+ '/' + secure_filename(g.user["username"]))
     total_num = len(imgs)
     step = 10
     index_start = int(page) * step
@@ -213,6 +229,7 @@ def view(page):
             my_imgs=imgs[index_start:index_end])
 
 @bp.route('/')
+@login_required
 def main():
     return render_template('tuchuang/backend.html')
    

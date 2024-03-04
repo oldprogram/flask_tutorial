@@ -45,7 +45,7 @@ window.onload=function(){
 }
 
 function uploadFile(file) {
-    let url = '/tuchuang/upload'
+    let url = '/tuchuang/user'
     let formData = new FormData()
 
     formData.append('file', file)

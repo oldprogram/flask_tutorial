@@ -12,5 +12,5 @@ build/
 .idea/
 *.swp
 *~
-flaskr/static/file/img/
+flaskr/static/file/private/
 flaskr/static/file/share/

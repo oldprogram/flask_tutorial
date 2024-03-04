@@ -16,14 +16,16 @@ from werkzeug.utils import secure_filename
 from pypinyin import lazy_pinyin
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = basedir+'/static/file/img'
-SHARE_FOLDER = basedir+'/static/file/share'
+PRIVATE_FOLDER = basedir+'/static/file/private'
+SHARE_COMMON_FOLDER = basedir+'/static/file/share/common'
+SHARE_TUCHUANG_FOLDER = basedir+'/static/file/share/tuchuang'
 ALLOWED_IMG_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 ALLOWED_SHARE_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'rar', 'py', 'c'}
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SHARE_FOLDER'] = SHARE_FOLDER
+app.config['PRIVATE_FOLDER'] = PRIVATE_FOLDER
+app.config['SHARE_COMMON_FOLDER'] = SHARE_COMMON_FOLDER
+app.config['SHARE_TUCHUANG_FOLDER'] = SHARE_TUCHUANG_FOLDER
 
 from flaskr.auth import login_required
 from flaskr.db import get_db
@@ -37,7 +39,13 @@ class File:
         self.url  = self.path.removeprefix(prefix)
         self.name = os.path.basename(file_path)
         self.size = os.path.getsize(file_path)
-        self.kind = self.name.rsplit('.', 1)[1].lower() 
+        
+        tmp = self.name.rsplit('.', 1)
+        if len(tmp) < 2:
+            self.kind = 'null'
+        else:
+            self.kind = tmp[1].lower() 
+
         self.date = time.strftime("%Y-%m-%d %H:%M:%S",
                     time.localtime(os.path.getmtime(file_path)))
 
@@ -86,12 +94,29 @@ class File:
         ext = filename.split('.')[1]
         filename = '_'.join(lazy_pinyin(name)) + '.' + ext
         return filename
+    
+    @staticmethod  
+    def simplify_path(path: str) -> str:
+        f_lst_new = []
+
+        for i in path.split('/'):
+            if i == '' or i == '.':
+                pass
+            elif i == '..':
+                if f_lst_new != []:
+                    f_lst_new.pop()
+            else:
+                f_lst_new.append(i)
+        return '/' + '/'.join(f_lst_new)
+        # 原文链接：https://blog.csdn.net/qq_35164554/article/details/122342584
 
 
-#####################################################################################
-@bp.route('/upload', methods=['GET', 'POST'])
+##############################################################################
+# upload & view (private) 
+##############################################################################
+@bp.route('/user', methods=['GET', 'POST'])
 @login_required
-def upload_file():
+def user_upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -115,7 +140,7 @@ def upload_file():
             # f.filename.rsplit('.', 1)[1] 获取文件的后缀
             # filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + str(random_num) + "." + filename.rsplit('.', 1)[1]
             filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + filename
-            file_path = app.config['UPLOAD_FOLDER'] + '/' + secure_filename(g.user["username"])   # basedir 代表获取当前位置的绝对路径
+            file_path = app.config['PRIVATE_FOLDER'] + '/' + secure_filename(g.user["username"])   # basedir 代表获取当前位置的绝对路径
             
             # 如果文件夹不存在，就创建文件夹
             if not os.path.exists(file_path):
@@ -126,12 +151,95 @@ def upload_file():
             file.save(os.path.join(file_path, filename))
             return redirect(url_for('tuchuang.download_file', name=filename))
     return render_template("tuchuang/upload.html")
+
+@bp.route('/user/download/<name>')
+@login_required
+def user_download_file(name):
+    file_path = app.config["PRIVATE_FOLDER"] + '/' + secure_filename(g.user["username"]) 
+    # 如果没有头像图片，则自动生成一个
+    # https://pypi.org/project/python-avatars/
+    if name == 'my_avatar.svg':
+        avatar_path = file_path + '/my_avatar.svg'
+        if not os.path.exists(avatar_path):
+            if not os.path.exists(file_path):
+	            os.makedirs(file_path)
+            pa.Avatar.random().render(avatar_path)
+
+    return send_from_directory(file_path, name)
     
+@bp.route('/user/view/page=<page>')
+@login_required
+def user_view(page):
+    print(os.getcwd()) # 输出当前工作目录的路径
+    print(os.path.abspath('.')) # 输出当前文件所在目录的绝对路径
+
+    imgs = File.search(app.config['PRIVATE_FOLDER']+ '/' + secure_filename(g.user["username"]))
+    total_num = len(imgs)
+    step = 10
+    index_start = int(page) * step
+    index_end = int(page) * step + step
+    if index_end > total_num:
+        index_end = total_num
+
+    return render_template('tuchuang/view.html', 
+            img_start = index_start, 
+            img_end = index_end,
+            img_step = step,
+            img_num = total_num ,
+            my_imgs=imgs[index_start:index_end])
+
+##############################################################################
+# tuchuang
+##############################################################################
+@bp.route('/tuchuang', methods=['GET', 'POST'])
+@login_required
+def tuchuang():
+    return render_template("tuchuang/tuchuang.html")
+
+@bp.route('/tuchuang/download/', methods=['GET'])
+def tuchuang_download_file():
+    # 判断请求接口是否带参数，否则加上自定义字符串（没有这个文件夹，返回404）
+    args = request.args.get('path') or 'no_file'
+    args = File.simplify_path(args)
+    # 拼接文件地址
+    file_path = app.config['SHARE_TUCHUANG_FOLDER'] + os.path.dirname(args)
+    name = os.path.basename(args)
+    #print('args->',args)
+    #print('file_path->',file_path)
+    #print('name->',name)
+
+    return send_from_directory(file_path, name)
+
+@bp.route('/tuchuang/view/page=<page>')
+@login_required
+def tuchuang_view(page):
+    print(os.getcwd()) # 输出当前工作目录的路径
+    print(os.path.abspath('.')) # 输出当前文件所在目录的绝对路径
+
+    imgs = File.search(app.config['SHARE_TUCHUANG_FOLDER'])
+    total_num = len(imgs)
+    step = 10
+    index_start = int(page) * step
+    index_end = int(page) * step + step
+    if index_end > total_num:
+        index_end = total_num
+
+    return render_template('tuchuang/tuchuang.html', 
+            img_start = index_start, 
+            img_end = index_end,
+            img_step = step,
+            img_num = total_num ,
+            my_imgs=imgs[index_start:index_end])
+
+
+##############################################################################
+# share 
+##############################################################################
 @bp.route('/share', methods=['GET', 'POST'])
 @login_required
 def share_file():
     if request.method == 'POST':
-        num_files = len(os.listdir(app.config['SHARE_FOLDER']))
+        num_files = len(os.listdir(app.config['SHARE_COMMON_FOLDER']))
         if num_files >= 10:
             flash('Share file limit 10')
             return jsonify(state="fail",reason="share file limit 10")
@@ -158,7 +266,7 @@ def share_file():
             # f.filename.rsplit('.', 1)[1] 获取文件的后缀
             # filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + str(random_num) + "." + filename.rsplit('.', 1)[1]
             filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + filename
-            file_path = app.config['SHARE_FOLDER']    # basedir 代表获取当前位置的绝对路径
+            file_path = app.config['SHARE_COMMON_FOLDER']    # basedir 代表获取当前位置的绝对路径
             
             # 如果文件夹不存在，就创建文件夹
             if not os.path.exists(file_path):
@@ -173,61 +281,28 @@ def share_file():
         else:
             return jsonify(state="fail",reason="file kind not allowed")
         
-    files = File.search(app.config['SHARE_FOLDER'])
+    files = File.search(app.config['SHARE_COMMON_FOLDER'])
     return render_template("tuchuang/share.html",my_files=files)
 
-@bp.route('/download/<name>')
-@login_required
-def download_file(name):
-    file_path = app.config["UPLOAD_FOLDER"] + '/' + secure_filename(g.user["username"]) 
-    # 如果没有头像图片，则自动生成一个
-    # https://pypi.org/project/python-avatars/
-    if name == 'my_avatar.svg':
-        avatar_path = file_path + '/my_avatar.svg'
-        if not os.path.exists(avatar_path):
-            if not os.path.exists(file_path):
-	            os.makedirs(file_path)
-            pa.Avatar.random().render(avatar_path)
+@bp.route('/share/download/<name>')
+def share_download_file(name):
+    return send_from_directory(app.config["SHARE_COMMON_FOLDER"], name)
 
-    return send_from_directory(file_path, name)
-    
-@bp.route('/download_share/<name>')
-def download_share_file(name):
-    return send_from_directory(app.config["SHARE_FOLDER"], name)
-
-@bp.route('/delete_share/<name>')
+@bp.route('/share/delete/<name>')
 @login_required
-def delete_share_file(name):
+def share_delete_file(name):
     # https://blog.csdn.net/weixin_43215588/article/details/121189959
     # Flask——返回json数据的方法
     name = os.path.basename(name)
-    file = app.config["SHARE_FOLDER"]+'/'+name
+    file = app.config["SHARE_COMMON_FOLDER"]+'/'+name
     if os.path.exists(file):
         os.remove(file)
     
     return jsonify(state="success")
 
-@bp.route('/view/page=<page>')
-@login_required
-def view(page):
-    print(os.getcwd()) # 输出当前工作目录的路径
-    print(os.path.abspath('.')) # 输出当前文件所在目录的绝对路径
-
-    imgs = File.search(app.config['UPLOAD_FOLDER']+ '/' + secure_filename(g.user["username"]))
-    total_num = len(imgs)
-    step = 10
-    index_start = int(page) * step
-    index_end = int(page) * step + step
-    if index_end > total_num:
-        index_end = total_num
-
-    return render_template('tuchuang/view.html', 
-            img_start = index_start, 
-            img_end = index_end,
-            img_step = step,
-            img_num = total_num ,
-            my_imgs=imgs[index_start:index_end])
-
+##############################################################################
+# root
+##############################################################################
 @bp.route('/')
 @login_required
 def main():

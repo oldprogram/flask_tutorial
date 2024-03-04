@@ -39,6 +39,28 @@ list 页面：
 
 ![][p3]
 
+</br>
+
+## V2.2
+
+- 调整 API，总共分为：
+
+	api | 描述 | 参数
+	---|---|---
+	`/user` | 用户私有资源页面 | 
+	`/user/download/<name>` | 用户下载 | GET `?path=\xx\xxxx.png`
+	`/user/view/page=<page>` | 用户资源列表 |
+	`/tuchuang` | 公共图床页面 | 
+	`/tuchuang/download/` | 图床资源下载 |
+	`/tuchuang/view/page=<page>` | 图床资源列表 |
+	`/share` | 公共共享页面 | POST file
+	`/share/download/<name>` | 共享资源下载 |
+	`/share/delete/<name>` | 共享资源删除 |
+- 文件夹调整为：
+	- private 存放各个用户私有文件
+	- share/common 存放共享资源
+	- share/tuchuang 存放图床资源
+
 [p1]:./doc/pic/tuchuang_upload.png
 [p2]:./doc/pic/tuchuang_list.png
 [p3]:./doc/pic/tuchuang_share.png

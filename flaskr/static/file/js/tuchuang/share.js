@@ -149,7 +149,7 @@ function deleteFile(btn) {
     var row = btn.parentNode.parentNode.parentNode; // 获取按钮所在的行
     var file_name = row.cells[0].innerText; // 获取第一个单元格的内容
 
-    let url = '/tuchuang/delete_share/'+file_name
+    let url = '/tuchuang/share/delete/'+file_name
     fetch(url) // 指定要获取数据的 URL
     .then(response => response.json()) // 将返回的响应转换为 JSON 格式
         .then(data => {
@@ -164,7 +164,7 @@ function deleteFile(btn) {
 }
 
 function downloadFile(fileName) {
-    let url = '/tuchuang/download_share/' + fileName;
+    let url = '/tuchuang/share/download/' + fileName;
     var link = document.createElement('a');
     link.href = url;
     link.download = fileName;
@@ -186,7 +186,7 @@ function makeQRcode(fileName) {
 
     //生成新二维码
     var url = document.URL;
-    url = url.replace("share", "download_share") + "/" + fileName;
+    url = url.replace("share", "share/download") + "/" + fileName;
     qrcode.clear();
     qrcode.makeCode(url);
 }

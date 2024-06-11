@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}登陆{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <div style="display: flex; align-items: center;">
+        <label for="username">邮箱：</label>
+        <input name="username" id="username" required>
+    </div>
+    <div style="display: flex; align-items: center;">
+        <label for="password">密码：</label>
+        <input type="password" name="password" id="password" required>
+    </div>
+    <input type="submit" value="登陆">
+  </form>
+{% endblock %}

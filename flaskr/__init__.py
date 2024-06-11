@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask import render_template
 
 
 def create_app(test_config=None):
@@ -27,9 +28,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    @app.route("/hello")
-    def hello():
-        return "Hello, World!"
 
     # register the database commands
     from flaskr import db
@@ -37,9 +35,14 @@ def create_app(test_config=None):
     db.init_app(app)
 
     # apply the blueprints to the app
-    from flaskr import auth, blog, tuchuang
+    from flaskr.server_auth.presenter import auth
+    from flaskr.server_main.presenter import main
+    from flaskr.server_blog.presenter import blog
+    from flaskr.server_tuchuang.presenter import tuchuang
+
 
     app.register_blueprint(auth.bp)
+    app.register_blueprint(main.bp)
     app.register_blueprint(blog.bp)
     app.register_blueprint(tuchuang.bp)
 
@@ -47,7 +50,12 @@ def create_app(test_config=None):
     # in another app, you might define a separate main index here with
     # app.route, while giving the blog blueprint a url_prefix, but for
     # the tutorial the blog will be the main index
-    app.add_url_rule("/", endpoint="index")
+    app.add_url_rule("/", endpoint=main.index)
     app.add_url_rule("/download/<name>", endpoint="download_file", build_only=True)
+
+
+    @app.route("/hello")
+    def hello():
+        return "Hello, World!"
 
     return app

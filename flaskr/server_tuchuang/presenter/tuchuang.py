@@ -27,10 +27,10 @@ app.config['PRIVATE_FOLDER'] = PRIVATE_FOLDER
 app.config['SHARE_COMMON_FOLDER'] = SHARE_COMMON_FOLDER
 app.config['SHARE_TUCHUANG_FOLDER'] = SHARE_TUCHUANG_FOLDER
 
-from flaskr.auth import login_required
+from flaskr.server_auth.presenter.auth import login_required
 from flaskr.db import get_db
 
-bp = Blueprint("tuchuang", __name__, url_prefix="/tuchuang")
+bp = Blueprint("tuchuang", __name__, url_prefix="/tuchuang", template_folder="../view")
 
 #####################################################################################
 class File:
@@ -150,7 +150,7 @@ def user_upload_file():
 
             file.save(os.path.join(file_path, filename))
             return redirect(url_for('tuchuang.download_file', name=filename))
-    return render_template("tuchuang/upload.html")
+    return render_template("tuchuang_html/upload.html")
 
 @bp.route('/user/download/<name>')
 @login_required
@@ -181,7 +181,8 @@ def user_view(page):
     if index_end > total_num:
         index_end = total_num
 
-    return render_template('tuchuang/view.html', 
+    print("administrator->", g.user["administrator"])
+    return render_template('tuchuang_html/view.html', 
             img_start = index_start, 
             img_end = index_end,
             img_step = step,
@@ -194,7 +195,7 @@ def user_view(page):
 @bp.route('/tuchuang', methods=['GET', 'POST'])
 @login_required
 def tuchuang():
-    return render_template("tuchuang/tuchuang.html")
+    return render_template("tuchuang_html/tuchuang.html")
 
 @bp.route('/tuchuang/download/', methods=['GET'])
 def tuchuang_download_file():
@@ -224,7 +225,7 @@ def tuchuang_view(page):
     if index_end > total_num:
         index_end = total_num
 
-    return render_template('tuchuang/tuchuang.html', 
+    return render_template('tuchuang_html/tuchuang.html', 
             img_start = index_start, 
             img_end = index_end,
             img_step = step,
@@ -282,7 +283,7 @@ def share_file():
             return jsonify(state="fail",reason="file kind not allowed")
         
     files = File.search(app.config['SHARE_COMMON_FOLDER'])
-    return render_template("tuchuang/share.html",my_files=files)
+    return render_template("tuchuang_html/share.html",my_files=files)
 
 @bp.route('/share/download/<name>')
 def share_download_file(name):
@@ -306,5 +307,5 @@ def share_delete_file(name):
 @bp.route('/')
 @login_required
 def main():
-    return render_template('tuchuang/backend.html')
+    return render_template('tuchuang_html/backend.html')
    

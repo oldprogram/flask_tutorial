@@ -13,7 +13,7 @@ from werkzeug.security import generate_password_hash
 
 from flaskr.db import get_db
 
-bp = Blueprint("auth", __name__, url_prefix="/auth")
+bp = Blueprint("auth", __name__, url_prefix="/auth",template_folder="../view")
 
 
 def login_required(view):
@@ -78,7 +78,7 @@ def register():
 
         flash(error)
 
-    return render_template("auth/register.html")
+    return render_template("register.html")
 
 
 @bp.route("/login", methods=("GET", "POST"))
@@ -102,15 +102,15 @@ def login():
             # store the user id in a new session and return to the index
             session.clear()
             session["user_id"] = user["id"]
-            return redirect(url_for("index"))
+            return redirect(url_for("main.index"))
 
         flash(error)
 
-    return render_template("auth/login.html")
+    return render_template("login.html")
 
 
 @bp.route("/logout")
 def logout():
     """Clear the current session, including the stored user id."""
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for("main.index"))

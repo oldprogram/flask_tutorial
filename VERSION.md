@@ -61,6 +61,19 @@ list 页面：
 	- share/common 存放共享资源
 	- share/tuchuang 存放图床资源
 
+</br>
+
+## V2.3
+
+- 根据蓝图设计独立的文件夹，因此有目录结构的调整
+
+	![][p4]
+
+每个大块负责一个独立业务，每个里面有其独立的 MVC 结构。
+
+
+
 [p1]:./doc/pic/tuchuang_upload.png
 [p2]:./doc/pic/tuchuang_list.png
 [p3]:./doc/pic/tuchuang_share.png
+[p4]:./doc/pic/tuchuang_dir_change.png

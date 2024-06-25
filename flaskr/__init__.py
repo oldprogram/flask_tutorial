@@ -39,12 +39,14 @@ def create_app(test_config=None):
     from flaskr.server_main.presenter import main
     from flaskr.server_blog.presenter import blog
     from flaskr.server_tuchuang.presenter import tuchuang
+    from flaskr.server_pcb.presenter import pcb
 
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
     app.register_blueprint(blog.bp)
     app.register_blueprint(tuchuang.bp)
+    app.register_blueprint(pcb.bp)
 
     # make url_for('index') == url_for('blog.index')
     # in another app, you might define a separate main index here with

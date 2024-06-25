@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTFZ IoT PCB 方案</title>
+    <link rel="stylesheet" href="{{ url_for('pcb.static', filename='pcb_css/style.css') }}" >
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('pcb.static', filename='pcb_static/logo.png') }}" alt="Logo" class="logo">
+        <h1>BTFZ IoT PCB 方案</h1>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>分类</h2>
+            <ul>
+                {% for category in categories %}
+                    <li><a href="#">{{ category }}</a></li>
+                    {% endfor %}
+            </ul>
+        </aside>
+        <section class="product-list">
+            {% for product in products %}
+            <div class="product" onclick="window.location.href='{{ product.url }}'">
+                <img src="{{ url_for('pcb.static', filename='pcb_static/products/' + product.space + '/pics/cover.png') }}" alt="{{ product.name }}">
+                <div class="product-details">
+                    <h3>{{ product.name }}</h3>
+                    <p class="category">分类: {{ product.category }}</p>
+                    <p class="views">浏览量: {{ product.views }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+    </div>
+</body>
+</html>
+

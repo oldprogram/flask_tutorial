@@ -71,6 +71,22 @@ list 页面：
 
 每个大块负责一个独立业务，每个里面有其独立的 MVC 结构。
 
+</br>
+
+## V2.4
+
+- 增加 pcb 商城第一版（server_pcb）
+    - chatgpt 一个类似淘宝商品页面，分离其 css 单独放置，将每个 product 的静态资源放在 view/pcb_static/products 中
+    - 采用 jinja 比较简单
+- 支持邮箱验证
+    - M flaskr/server_auth/presenter/auth.py 
+        - 利用 flask_mail 实现邮件发送功能（需要根据其中的 LINK1 配置 app.config，然后给 mail 初始化，具体遇到两个问题，看 link1 后面俩链接）
+        - 对于获取验证码的接口由于会频繁发送邮件，因此利用 session（存储在浏览器端的 k-v），记录请求间隔和请求次数，进行限制）
+    - M flaskr/server_auth/view/register.html （调整支持密码长度限制，用户邮箱检测，动态更改获取验证码状态，获取验证码）
+    - flaskr/server_auth/view/verify.html  （用于给用户发送的邮件格式）
+
+</br>
+
 
 
 [p1]:./doc/pic/tuchuang_upload.png

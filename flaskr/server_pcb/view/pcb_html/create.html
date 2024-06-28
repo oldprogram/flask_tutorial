@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form with Image Upload and Preview</title>
+    <link rel="stylesheet" href="{{ url_for('pcb.static', filename='pcb_css/style_create.css') }}" >
+    <script type="text/javascript"  src="{{ url_for('pcb.static', filename='pcb_js/js_create.js') }}" defer=""></script>
+</head>
+<body>
+    <header>
+        <h1>创建 PCB 方案</h1>
+    </header>
+    <main>
+        <form id="myForm" method="post" enctype="multipart/form-data" onsubmit="handleFormSubmit(event)">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="imageUpload">Upload Image (240x240 PNG):</label>
+            <input type="file" id="imageUpload" name="imageUpload" accept="image/png" required>
+            <div id="imagePreview"></div>
+
+            <div class="existing-categories-container">
+                <label>Existing Categories:</label>
+                <span id="existingCategories">
+                    <!-- Existing categories will be displayed here -->
+                </span>
+                <!-- Hidden input to store selected categories -->
+                <input type="hidden" id="selectedCategories" name="selectedCategories">
+                <br>
+                <input type="text" id="newCategory" placeholder="Add new category">
+                <button type="button" onclick="addCategory()">Add</button>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+    </main>
+</body>
+</html>
+

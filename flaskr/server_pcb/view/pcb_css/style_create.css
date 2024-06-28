@@ -1,0 +1,127 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    padding: 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+}
+
+main {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    background: #fff;
+    margin: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="file"],
+button {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+input[type="text"]:focus,
+input[type="file"]:focus,
+button:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#imagePreview {
+    width: 240px;
+    height: 240px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+#imagePreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.existing-categories-container {
+    margin-bottom: 20px;
+}
+
+.existing-categories-container label,
+.existing-categories-container input[type="text"] {
+    display: inline-block;
+}
+
+.existing-categories-container label {
+    margin-right: 8px;
+}
+
+.existing-categories-container input[type="text"] {
+    width: auto;
+    flex-grow: 1;
+}
+
+.existing-categories-container button {
+    width: auto;
+}
+
+.existing-categories-container span {
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.category-item {
+    display: inline-block;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+.category-item label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.category-item input {
+    margin-right: 4px;
+}

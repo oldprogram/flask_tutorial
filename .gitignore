@@ -14,3 +14,5 @@ build/
 *~
 flaskr/static/file/private/
 flaskr/static/file/share/
+flaskr/server_pcb/view/pcb_static/products/
+flaskr/server_tuchuang/presenter/static/file/private/
